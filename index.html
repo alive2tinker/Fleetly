@@ -135,19 +135,19 @@
        ══════════════════════════════════════════ */
     #setup {
       display: none; position: relative; z-index: 10;
-      padding: 30px 50px 40px; opacity: 0;
+      padding: 20px 50px 30px; opacity: 0;
       transition: opacity 0.5s ease;
     }
     #setup.visible { display: block; opacity: 1; }
 
-    .setup-header { text-align: center; margin-bottom: 30px; }
-    .setup-header h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
-    .setup-header p { color: var(--text-secondary); font-size: 13px; }
+    .setup-header { text-align: center; margin-bottom: 14px; }
+    .setup-header h1 { font-size: 20px; font-weight: 700; margin-bottom: 2px; }
+    .setup-header p { color: var(--text-secondary); font-size: 12px; }
 
-    .dep-list { display: flex; flex-direction: column; gap: 12px; }
+    .dep-list { display: flex; flex-direction: column; gap: 8px; }
     .dep-card {
-      display: flex; align-items: center; gap: 14px;
-      padding: 16px 20px; background: var(--bg-card);
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 16px; background: var(--bg-card);
       border: 1px solid var(--border); border-radius: 10px;
       opacity: 0; transform: translateY(16px);
       transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
@@ -159,21 +159,24 @@
     .dep-card.installing { border-color: rgba(108, 99, 255, 0.4); box-shadow: 0 0 12px var(--accent-glow); }
 
     .dep-icon {
-      width: 40px; height: 40px; border-radius: 9px;
+      width: 34px; height: 34px; border-radius: 8px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 18px; font-weight: 700; flex-shrink: 0; color: white;
+      font-size: 15px; font-weight: 700; flex-shrink: 0; color: white;
     }
     .dep-icon.php { background: linear-gradient(135deg, #4f5b93, #777bb4); }
     .dep-icon.node { background: linear-gradient(135deg, #215732, #3c873a); }
     .dep-icon.mysql { background: linear-gradient(135deg, #00546b, #0074a2); }
     .dep-icon.nginx { background: linear-gradient(135deg, #006400, #009639); }
+    .dep-icon.composer { background: linear-gradient(135deg, #8b5e3c, #c4713b); }
+    .dep-icon.valet { background: linear-gradient(135deg, #e44d26, #f16529); }
+    .dep-icon.laravel { background: linear-gradient(135deg, #e3342f, #ff6b6b); }
 
     .dep-info { flex: 1; }
     .dep-name { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
     .dep-version { font-size: 11px; color: var(--text-secondary); }
     .dep-version.install-status { color: var(--accent); }
     .dep-version.install-success { color: var(--success); }
-    .dep-version.install-failed { color: var(--error); }
+    .dep-version.install-failed { color: var(--error); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 
     .dep-status { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 
@@ -190,9 +193,9 @@
     @keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
 
     .summary {
-      margin-top: 20px; padding: 14px 20px; background: var(--bg-card);
+      margin-bottom: 14px; padding: 10px 16px; background: var(--bg-card);
       border: 1px solid var(--border); border-radius: 10px;
-      display: flex; align-items: center; justify-content: space-between;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
       opacity: 0; transform: translateY(8px); transition: all 0.5s ease;
     }
     .summary.visible { opacity: 1; transform: translateY(0); }
@@ -223,7 +226,7 @@
     .install-all-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
     .continue-btn {
-      display: none; margin: 20px auto 0; padding: 10px 32px;
+      display: none; margin: 0 auto 14px; padding: 10px 32px;
       border-radius: 10px; border: none; font-size: 13px; font-weight: 600;
       cursor: pointer; -webkit-app-region: no-drag;
       background: linear-gradient(135deg, var(--accent), var(--success)); color: white;
@@ -370,7 +373,7 @@
     }
     .site-status.running { background: rgba(0, 210, 160, 0.15); color: var(--success); }
     .site-status.stopped { background: rgba(136, 136, 160, 0.15); color: var(--text-secondary); }
-    .site-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .site-actions { position: relative; flex-shrink: 0; }
     .site-action-btn {
       width: 30px; height: 30px; border-radius: 7px; border: 1px solid var(--border);
       background: transparent; color: var(--text-secondary);
@@ -379,6 +382,120 @@
     }
     .site-action-btn:hover { border-color: var(--accent); color: var(--text-primary); background: rgba(108,99,255,0.08); }
     .site-action-btn svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2; fill: none; }
+
+    .site-dropdown {
+      display: none; position: absolute; right: 0; top: 36px;
+      background: var(--bg-secondary); border: 1px solid var(--border);
+      border-radius: 10px; padding: 4px; min-width: 170px;
+      z-index: 20; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      animation: fadeIn 0.15s ease;
+      -webkit-app-region: no-drag;
+    }
+    .site-dropdown.visible { display: block; }
+    .site-dropdown-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 12px; border-radius: 7px; font-size: 12px;
+      font-weight: 500; color: var(--text-secondary);
+      cursor: pointer; transition: all 0.1s ease;
+      -webkit-app-region: no-drag;
+    }
+    .site-dropdown-item:hover { background: rgba(108, 99, 255, 0.1); color: var(--text-primary); }
+    .site-dropdown-item.danger:hover { background: rgba(255, 107, 107, 0.1); color: var(--error); }
+    .site-dropdown-item svg {
+      width: 15px; height: 15px; stroke: currentColor;
+      stroke-width: 1.8; fill: none; flex-shrink: 0;
+    }
+    .site-dropdown-divider {
+      height: 1px; background: var(--border); margin: 4px 8px;
+    }
+
+    /* ── Settings page ── */
+    .settings-layout {
+      display: flex; gap: 0; height: 100%;
+    }
+    .settings-sidebar {
+      width: 160px; flex-shrink: 0;
+      border-right: 1px solid var(--border);
+      padding: 8px; display: flex; flex-direction: column; gap: 2px;
+    }
+    .settings-nav-item {
+      display: flex; align-items: center; gap: 9px;
+      padding: 9px 12px; border-radius: 8px;
+      font-size: 12px; font-weight: 500; color: var(--text-secondary);
+      cursor: pointer; -webkit-app-region: no-drag;
+      transition: all 0.15s ease; border: 1px solid transparent;
+    }
+    .settings-nav-item:hover { background: rgba(108, 99, 255, 0.08); color: var(--text-primary); }
+    .settings-nav-item.active {
+      background: rgba(108, 99, 255, 0.12); color: var(--text-primary);
+      border-color: var(--border);
+    }
+    .settings-nav-item svg {
+      width: 16px; height: 16px; stroke: currentColor;
+      stroke-width: 1.8; fill: none; flex-shrink: 0;
+    }
+    .settings-content {
+      flex: 1; padding: 0 24px; overflow-y: auto;
+    }
+    .settings-content::-webkit-scrollbar { width: 5px; }
+    .settings-content::-webkit-scrollbar-thumb { background: var(--bg-secondary); border-radius: 3px; }
+    .settings-panel { display: none; }
+    .settings-panel.active { display: block; animation: fadeIn 0.2s ease; }
+    .settings-section-title {
+      font-size: 14px; font-weight: 700; margin-bottom: 6px;
+    }
+    .settings-section-desc {
+      font-size: 11px; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5;
+    }
+
+    .dir-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+    .dir-card {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 14px; background: var(--bg-card);
+      border: 1px solid var(--border); border-radius: 9px;
+      animation: fadeIn 0.2s ease;
+    }
+    .dir-card-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: rgba(108, 99, 255, 0.12);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .dir-card-icon svg {
+      width: 16px; height: 16px; stroke: var(--accent);
+      stroke-width: 1.8; fill: none;
+    }
+    .dir-card-info { flex: 1; min-width: 0; }
+    .dir-card-path {
+      font-size: 12px; font-weight: 500;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .dir-card-status { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
+    .dir-card-status.parked { color: var(--success); }
+    .dir-card-status.parking { color: var(--accent); }
+    .dir-card-status.error { color: var(--error); }
+    .dir-card-remove {
+      width: 28px; height: 28px; border-radius: 7px; border: 1px solid var(--border);
+      background: transparent; color: var(--text-secondary);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; -webkit-app-region: no-drag;
+      transition: all 0.15s ease; flex-shrink: 0;
+    }
+    .dir-card-remove:hover { border-color: var(--error); color: var(--error); background: rgba(255,107,107,0.08); }
+    .dir-card-remove svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2; fill: none; }
+
+    .add-dir-btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; padding: 12px; border-radius: 9px;
+      border: 1px dashed var(--border); background: transparent;
+      color: var(--text-secondary); font-size: 12px; font-weight: 500;
+      cursor: pointer; -webkit-app-region: no-drag;
+      font-family: inherit; transition: all 0.15s ease;
+    }
+    .add-dir-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(108,99,255,0.05); }
+    .add-dir-btn:disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
+    .add-dir-btn svg {
+      width: 16px; height: 16px; stroke: currentColor; stroke-width: 2; fill: none;
+    }
 
     /* Modal overlay */
     .modal-overlay {
@@ -389,9 +506,12 @@
     .modal-overlay.visible { display: flex; animation: fadeIn 0.2s ease; }
     .modal {
       background: var(--bg-secondary); border: 1px solid var(--border);
-      border-radius: 14px; padding: 28px; width: 380px;
-      -webkit-app-region: no-drag;
+      border-radius: 14px; padding: 28px; width: 480px;
+      -webkit-app-region: no-drag; max-height: 520px; overflow-y: auto;
     }
+    .modal::-webkit-scrollbar { width: 5px; }
+    .modal::-webkit-scrollbar-track { background: transparent; }
+    .modal::-webkit-scrollbar-thumb { background: var(--bg-card); border-radius: 3px; }
     .modal h3 { font-size: 16px; font-weight: 700; margin-bottom: 18px; }
     .modal-field { margin-bottom: 14px; }
     .modal-field label { display: block; font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-bottom: 6px; }
@@ -417,6 +537,73 @@
       -webkit-app-region: no-drag; transition: all 0.15s ease;
     }
     .btn-modal-primary:hover { background: #5a52e0; }
+    .btn-modal-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Source tabs */
+    .source-tabs {
+      display: flex; gap: 8px; margin-bottom: 18px;
+    }
+    .source-tab {
+      flex: 1; padding: 12px; border-radius: 10px;
+      border: 1px solid var(--border); background: var(--bg-card);
+      cursor: pointer; text-align: center; transition: all 0.2s ease;
+      -webkit-app-region: no-drag;
+    }
+    .source-tab:hover { border-color: rgba(108, 99, 255, 0.3); }
+    .source-tab.active { border-color: var(--accent); background: rgba(108, 99, 255, 0.1); }
+    .source-tab-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+    .source-tab-desc { font-size: 10px; color: var(--text-secondary); }
+
+    /* Option cards for starter kits */
+    .option-cards { display: flex; flex-wrap: wrap; gap: 8px; }
+    .option-card {
+      flex: 1; min-width: calc(50% - 4px); padding: 10px 12px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--bg-card);
+      cursor: pointer; transition: all 0.15s ease;
+      -webkit-app-region: no-drag;
+    }
+    .option-card:hover { border-color: rgba(108, 99, 255, 0.3); }
+    .option-card.active { border-color: var(--accent); background: rgba(108, 99, 255, 0.1); }
+    .option-card-name { font-size: 12px; font-weight: 600; }
+    .option-card-desc { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
+
+    /* Checkbox row */
+    .checkbox-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 0; cursor: pointer; -webkit-app-region: no-drag;
+    }
+    .checkbox-row input[type="checkbox"] {
+      width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer;
+    }
+    .checkbox-row span { font-size: 12px; font-weight: 500; }
+
+    /* Conditional section */
+    .conditional-section { display: none; }
+    .conditional-section.visible { display: block; animation: fadeIn 0.2s ease; }
+
+    /* Progress section */
+    .creation-progress {
+      display: none; flex-direction: column; gap: 12px;
+    }
+    .creation-progress.visible { display: flex; }
+    .progress-status { font-size: 13px; font-weight: 600; text-align: center; }
+    .progress-bar-container {
+      width: 100%; height: 4px; background: var(--bg-card);
+      border-radius: 2px; overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--success));
+      border-radius: 2px; transition: width 0.3s ease;
+    }
+    .progress-log {
+      max-height: 120px; overflow-y: auto; padding: 10px 12px;
+      background: var(--bg-card); border-radius: 8px;
+      border: 1px solid var(--border); font-family: monospace;
+      font-size: 11px; color: var(--text-secondary); line-height: 1.6;
+    }
+    .progress-log::-webkit-scrollbar { width: 4px; }
+    .progress-log::-webkit-scrollbar-thumb { background: var(--bg-secondary); border-radius: 2px; }
   </style>
 </head>
 <body>
@@ -454,6 +641,11 @@
         <h1>System Dependencies</h1>
         <p>Checking required tools for web development</p>
       </div>
+      <div class="summary" id="summary">
+        <div class="summary-text" id="summaryText"></div>
+        <div class="summary-badge" id="summaryBadge"></div>
+      </div>
+      <button class="continue-btn" id="continueBtn" onclick="transitionToApp()">Continue to Dashboard</button>
       <div class="dep-list" id="depList">
         <div class="dep-card" id="card-php">
           <div class="dep-icon php">P</div>
@@ -475,12 +667,22 @@
           <div class="dep-info"><div class="dep-name">Nginx</div><div class="dep-version" id="ver-nginx"><span class="waiting-dots">Waiting</span></div></div>
           <div class="dep-status" id="status-nginx"></div>
         </div>
+        <div class="dep-card" id="card-composer">
+          <div class="dep-icon composer">C</div>
+          <div class="dep-info"><div class="dep-name">Composer</div><div class="dep-version" id="ver-composer"><span class="waiting-dots">Waiting</span></div></div>
+          <div class="dep-status" id="status-composer"></div>
+        </div>
+        <div class="dep-card" id="card-valet">
+          <div class="dep-icon valet">V</div>
+          <div class="dep-info"><div class="dep-name">Valet</div><div class="dep-version" id="ver-valet"><span class="waiting-dots">Waiting</span></div></div>
+          <div class="dep-status" id="status-valet"></div>
+        </div>
+        <div class="dep-card" id="card-laravel">
+          <div class="dep-icon laravel">L</div>
+          <div class="dep-info"><div class="dep-name">Laravel Installer</div><div class="dep-version" id="ver-laravel"><span class="waiting-dots">Waiting</span></div></div>
+          <div class="dep-status" id="status-laravel"></div>
+        </div>
       </div>
-      <div class="summary" id="summary">
-        <div class="summary-text" id="summaryText"></div>
-        <div class="summary-badge" id="summaryBadge"></div>
-      </div>
-      <button class="continue-btn" id="continueBtn" onclick="transitionToApp()">Continue to Dashboard</button>
     </div>
 
     <!-- ── Main Dashboard App ── -->
@@ -557,12 +759,73 @@
           <div class="page-header">
             <div><h2>Settings</h2><p>Configure Fleetly preferences</p></div>
           </div>
-          <div class="empty-state">
-            <div class="empty-state-icon">
-              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <div class="settings-layout">
+            <div class="settings-sidebar">
+              <div class="settings-nav-item active" data-settings="directories" onclick="switchSettings('directories')">
+                <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                Directories
+              </div>
+              <div class="settings-nav-item" data-settings="general" onclick="switchSettings('general')">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                General
+              </div>
             </div>
-            <h3>Coming soon</h3>
-            <p>Settings will be available in a future update.</p>
+            <div class="settings-content">
+              <!-- Directories panel -->
+              <div class="settings-panel active" id="settings-directories">
+                <div class="settings-section-title">Parked Directories</div>
+                <div class="settings-section-desc">
+                  Directories where Valet will look for your sites. Each subdirectory becomes accessible as subdirectory-name.test in the browser.
+                </div>
+                <div class="dir-list" id="dirList"></div>
+                <button class="add-dir-btn" onclick="addParkedDirectory()">
+                  <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Add Directory
+                </button>
+
+                <div style="margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--border);">
+                  <div class="settings-section-title">Valet Services</div>
+                  <div class="settings-section-desc">
+                    Manage Nginx, PHP-FPM, and dnsmasq. These must be running for .test sites to work.
+                  </div>
+                  <div id="valetServiceStatus" style="margin-bottom: 12px; display: flex; gap: 8px; flex-wrap: wrap;"></div>
+                  <div style="display: flex; gap: 8px;">
+                    <button class="add-dir-btn" id="valetStartBtn" onclick="valetStart()" style="flex:1;">
+                      <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/></svg>
+                      Start Services
+                    </button>
+                    <button class="add-dir-btn" id="valetStopBtn" onclick="valetStop()" style="flex:1;">
+                      <svg viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" fill="currentColor" stroke="none"/><rect x="14" y="4" width="4" height="16" fill="currentColor" stroke="none"/></svg>
+                      Stop Services
+                    </button>
+                  </div>
+                </div>
+
+                <div style="margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--border);">
+                  <div class="settings-section-title">DNS Configuration</div>
+                  <div class="settings-section-desc">
+                    Fix DNS so .test domains resolve locally via dnsmasq while keeping internet access. Run this if sites aren't loading or after a fresh Valet install.
+                  </div>
+                  <button class="add-dir-btn" id="fixDnsBtn" onclick="fixDns()">
+                    <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                    Fix DNS &amp; Restart dnsmasq
+                  </button>
+                </div>
+              </div>
+
+              <!-- General panel (placeholder for future settings) -->
+              <div class="settings-panel" id="settings-general">
+                <div class="settings-section-title">General</div>
+                <div class="settings-section-desc">General application preferences.</div>
+                <div class="empty-state" style="padding: 40px 20px;">
+                  <div class="empty-state-icon">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                  </div>
+                  <h3>Coming soon</h3>
+                  <p>More settings will be available in a future update.</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -571,26 +834,149 @@
       <div class="modal-overlay" id="newSiteModal">
         <div class="modal">
           <h3>Create New Site</h3>
-          <div class="modal-field">
-            <label>Site Name</label>
-            <input type="text" id="siteName" placeholder="my-awesome-project">
+
+          <!-- Form content (hidden during progress) -->
+          <div id="newSiteForm">
+            <!-- Source type tabs -->
+            <div class="source-tabs">
+              <div class="source-tab active" data-source="laravel" onclick="switchSource('laravel')">
+                <div class="source-tab-title">New Laravel Project</div>
+                <div class="source-tab-desc">Start from scratch</div>
+              </div>
+              <div class="source-tab" data-source="git" onclick="switchSource('git')">
+                <div class="source-tab-title">Clone Git Repo</div>
+                <div class="source-tab-desc">From existing repository</div>
+              </div>
+            </div>
+
+            <!-- ── Laravel New Section ── -->
+            <div id="laravelSection" class="conditional-section visible">
+              <div class="modal-field">
+                <label>Project Name</label>
+                <input type="text" id="laravelName" placeholder="my-awesome-project">
+              </div>
+
+              <div class="modal-field">
+                <label>Starter Kit</label>
+                <div class="option-cards">
+                  <div class="option-card active" data-kit="none" onclick="selectStarterKit('none')">
+                    <div class="option-card-name">None</div>
+                    <div class="option-card-desc">Bare Laravel app</div>
+                  </div>
+                  <div class="option-card" data-kit="breeze" onclick="selectStarterKit('breeze')">
+                    <div class="option-card-name">Breeze</div>
+                    <div class="option-card-desc">Auth scaffolding</div>
+                  </div>
+                  <div class="option-card" data-kit="jetstream" onclick="selectStarterKit('jetstream')">
+                    <div class="option-card-name">Jetstream</div>
+                    <div class="option-card-desc">Full-featured auth</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Breeze stack options -->
+              <div id="breezeOptions" class="conditional-section">
+                <div class="modal-field">
+                  <label>Frontend Stack</label>
+                  <select id="breezeStack">
+                    <option value="blade">Blade with Alpine</option>
+                    <option value="livewire">Livewire (Volt Class API) with Alpine</option>
+                    <option value="livewire-functional">Livewire (Volt Functional API) with Alpine</option>
+                    <option value="react">React with Inertia</option>
+                    <option value="vue">Vue with Inertia</option>
+                    <option value="api">API Only</option>
+                  </select>
+                </div>
+                <div class="checkbox-row" onclick="toggleCheckbox('breezeDark')">
+                  <input type="checkbox" id="breezeDark">
+                  <span>Dark mode support</span>
+                </div>
+                <div class="checkbox-row" onclick="toggleCheckbox('breezeSSR')">
+                  <input type="checkbox" id="breezeSSR">
+                  <span>Server-side rendering (Inertia)</span>
+                </div>
+                <div class="checkbox-row" onclick="toggleCheckbox('breezeTypescript')">
+                  <input type="checkbox" id="breezeTypescript">
+                  <span>TypeScript (React/Vue)</span>
+                </div>
+              </div>
+
+              <!-- Jetstream stack options -->
+              <div id="jetstreamOptions" class="conditional-section">
+                <div class="modal-field">
+                  <label>Frontend Stack</label>
+                  <select id="jetstreamStack">
+                    <option value="livewire">Livewire</option>
+                    <option value="inertia">Inertia (Vue)</option>
+                  </select>
+                </div>
+                <div class="checkbox-row" onclick="toggleCheckbox('jetstreamTeams')">
+                  <input type="checkbox" id="jetstreamTeams">
+                  <span>Team support</span>
+                </div>
+                <div class="checkbox-row" onclick="toggleCheckbox('jetstreamDark')">
+                  <input type="checkbox" id="jetstreamDark">
+                  <span>Dark mode support</span>
+                </div>
+                <div class="checkbox-row" onclick="toggleCheckbox('jetstreamSSR')">
+                  <input type="checkbox" id="jetstreamSSR">
+                  <span>Server-side rendering (Inertia)</span>
+                </div>
+              </div>
+
+              <div class="modal-field">
+                <label>Database</label>
+                <select id="laravelDatabase">
+                  <option value="sqlite">SQLite</option>
+                  <option value="mysql">MySQL</option>
+                  <option value="mariadb">MariaDB</option>
+                  <option value="pgsql">PostgreSQL</option>
+                  <option value="sqlsrv">SQL Server</option>
+                </select>
+              </div>
+
+              <div class="modal-field">
+                <label>Testing Framework</label>
+                <select id="laravelTesting">
+                  <option value="pest">Pest</option>
+                  <option value="phpunit">PHPUnit</option>
+                </select>
+              </div>
+
+              <div class="checkbox-row" onclick="toggleCheckbox('laravelGit')">
+                <input type="checkbox" id="laravelGit" checked>
+                <span>Initialize Git repository</span>
+              </div>
+            </div>
+
+            <!-- ── Git Clone Section ── -->
+            <div id="gitSection" class="conditional-section">
+              <div class="modal-field">
+                <label>Git Repository URL</label>
+                <input type="text" id="gitUrl" placeholder="https://github.com/user/repo.git">
+              </div>
+              <div class="modal-field">
+                <label>Project Name (optional, derived from URL)</label>
+                <input type="text" id="gitName" placeholder="my-project">
+              </div>
+            </div>
+
+            <div class="modal-actions">
+              <button class="btn-ghost" onclick="closeNewSiteModal()">Cancel</button>
+              <button class="btn-modal-primary" id="createSiteBtn" onclick="createSite()">Create Site</button>
+            </div>
           </div>
-          <div class="modal-field">
-            <label>Framework</label>
-            <select id="siteFramework">
-              <option value="laravel">Laravel (PHP)</option>
-              <option value="vanilla-php">Vanilla PHP</option>
-              <option value="node">Node.js / Express</option>
-              <option value="static">Static HTML</option>
-            </select>
-          </div>
-          <div class="modal-field">
-            <label>Local Domain</label>
-            <input type="text" id="siteDomain" placeholder="my-project.test">
-          </div>
-          <div class="modal-actions">
-            <button class="btn-ghost" onclick="closeNewSiteModal()">Cancel</button>
-            <button class="btn-modal-primary" onclick="createSite()">Create Site</button>
+
+          <!-- Progress display -->
+          <div class="creation-progress" id="creationProgress">
+            <div class="progress-status" id="progressStatus">Creating project...</div>
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+            <div class="progress-log" id="progressLog"></div>
+            <div class="modal-actions" id="progressActions" style="display:none;">
+              <button class="btn-modal-primary" onclick="closeNewSiteModal()">Done</button>
+            </div>
           </div>
         </div>
       </div>
@@ -618,18 +1004,11 @@
     async function start() {
       const setupDone = await window.api.isSetupComplete();
 
-      if (setupDone) {
-        document.getElementById('splash').classList.add('hidden');
-        await new Promise(r => setTimeout(r, 300));
-        showApp();
-        return;
-      }
-
-      // First run: splash → dep check
-      await new Promise(r => setTimeout(r, 2200));
+      // Always run dependency checks, even if setup was previously completed
+      await new Promise(r => setTimeout(r, setupDone ? 800 : 2200));
       document.getElementById('splash').classList.add('hidden');
 
-      setTimeout(() => {
+      setTimeout(async () => {
         const setup = document.getElementById('setup');
         setup.classList.add('visible');
         const cards = document.querySelectorAll('.dep-card');
@@ -644,6 +1023,8 @@
       document.getElementById('app').style.display = '';
       document.getElementById('app').classList.add('visible');
       await loadSites();
+      await loadParkedDirs();
+      await refreshValetStatus();
     }
 
     function transitionToApp() {
@@ -752,8 +1133,10 @@
         updateSummaryAfterInstall();
       } else {
         card.classList.add('error');
-        verEl.textContent = 'Install failed';
+        const errMsg = result.output ? result.output.split('\n').filter(l => l.trim()).slice(-2).join(' ').substring(0, 120) : 'Unknown error';
+        verEl.textContent = `Failed: ${errMsg}`;
         verEl.className = 'dep-version install-failed';
+        verEl.title = result.output || 'Unknown error';
         statusEl.innerHTML = `<div class="status-icon error">${crossSvg}</div>`;
       }
     }
@@ -787,8 +1170,10 @@
           missingDeps = missingDeps.filter(d => d.icon !== result.depKey);
         } else {
           card.classList.add('error');
-          verEl.textContent = 'Failed';
+          const errMsg = result.output ? result.output.split('\n').filter(l => l.trim()).slice(-2).join(' ').substring(0, 120) : 'Unknown error';
+          verEl.textContent = `Failed: ${errMsg}`;
           verEl.className = 'dep-version install-failed';
+          verEl.title = result.output || 'Unknown error';
           statusEl.innerHTML = `<div class="status-icon error">${crossSvg}</div>`;
         }
       }
@@ -797,7 +1182,7 @@
     }
 
     function updateSummaryAfterInstall() {
-      const total = 4;
+      const total = document.querySelectorAll('.dep-card').length;
       const installed = total - missingDeps.length;
       document.getElementById('summaryText').textContent = `${installed} of ${total} dependencies found`;
       const badgeEl = document.getElementById('summaryBadge');
@@ -819,7 +1204,7 @@
       document.getElementById('app').classList.remove('visible');
       document.getElementById('app').style.display = 'none';
 
-      const keys = ['php', 'node', 'mysql', 'nginx'];
+      const keys = ['php', 'node', 'mysql', 'nginx', 'composer', 'valet', 'laravel'];
       for (const key of keys) {
         const card = document.getElementById(`card-${key}`);
         card.className = 'dep-card';
@@ -852,6 +1237,9 @@
     }
 
     // ── Sites Management ──
+    let currentSource = 'laravel';
+    let currentStarterKit = 'none';
+
     async function loadSites() {
       sites = await window.api.getSites();
       renderSites();
@@ -881,58 +1269,428 @@
           </div>
           <div class="site-info">
             <div class="site-name">${site.name}</div>
-            <div class="site-path">${site.domain}</div>
+            <div class="site-path">${site.path || site.domain}</div>
           </div>
           <div class="site-status stopped">Stopped</div>
           <div class="site-actions">
-            <button class="site-action-btn" title="Delete" onclick="deleteSite(${i})">
-              <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            <button class="site-action-btn" title="Actions" onclick="toggleSiteDropdown(event, ${i})">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.5" fill="currentColor" stroke="none"/></svg>
             </button>
+            <div class="site-dropdown" id="dropdown-${i}">
+              <div class="site-dropdown-item" onclick="siteAction(event, 'view', ${i})">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                View in Browser
+              </div>
+              <div class="site-dropdown-item" onclick="siteAction(event, 'editor', ${i})">
+                <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Open in Editor
+              </div>
+              <div class="site-dropdown-item" onclick="siteAction(event, 'terminal', ${i})">
+                <svg viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+                Open in Terminal
+              </div>
+              <div class="site-dropdown-divider"></div>
+              <div class="site-dropdown-item danger" onclick="siteAction(event, 'delete', ${i})">
+                <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                Delete
+              </div>
+            </div>
           </div>
         </div>
       `).join('');
     }
 
+    function switchSource(source) {
+      currentSource = source;
+      document.querySelectorAll('.source-tab').forEach(t => t.classList.remove('active'));
+      document.querySelector(`.source-tab[data-source="${source}"]`).classList.add('active');
+
+      document.getElementById('laravelSection').classList.toggle('visible', source === 'laravel');
+      document.getElementById('gitSection').classList.toggle('visible', source === 'git');
+
+      document.getElementById('createSiteBtn').textContent =
+        source === 'laravel' ? 'Create Project' : 'Clone & Setup';
+    }
+
+    function selectStarterKit(kit) {
+      currentStarterKit = kit;
+      document.querySelectorAll('.option-card[data-kit]').forEach(c => c.classList.remove('active'));
+      document.querySelector(`.option-card[data-kit="${kit}"]`).classList.add('active');
+
+      document.getElementById('breezeOptions').classList.toggle('visible', kit === 'breeze');
+      document.getElementById('jetstreamOptions').classList.toggle('visible', kit === 'jetstream');
+    }
+
+    function toggleCheckbox(id) {
+      const cb = document.getElementById(id);
+      cb.checked = !cb.checked;
+    }
+
     function openNewSiteModal() {
       document.getElementById('newSiteModal').classList.add('visible');
-      document.getElementById('siteName').value = '';
-      document.getElementById('siteDomain').value = '';
-      document.getElementById('siteName').focus();
+      document.getElementById('newSiteForm').style.display = '';
+      document.getElementById('creationProgress').classList.remove('visible');
+      document.getElementById('progressActions').style.display = 'none';
+      document.getElementById('progressLog').textContent = '';
+      document.getElementById('progressBar').style.width = '0%';
+
+      // Reset form
+      switchSource('laravel');
+      selectStarterKit('none');
+      document.getElementById('laravelName').value = '';
+      document.getElementById('gitUrl').value = '';
+      document.getElementById('gitName').value = '';
+      document.getElementById('laravelName').focus();
     }
 
     function closeNewSiteModal() {
       document.getElementById('newSiteModal').classList.remove('visible');
     }
 
-    // Auto-fill domain when name changes
-    document.getElementById('siteName').addEventListener('input', (e) => {
-      const name = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
-      document.getElementById('siteDomain').value = name ? `${name}.test` : '';
+    // Auto-derive git project name from URL
+    document.getElementById('gitUrl').addEventListener('input', (e) => {
+      const url = e.target.value.trim();
+      const match = url.match(/\/([^/]+?)(\.git)?$/);
+      if (match && !document.getElementById('gitName').dataset.userEdited) {
+        document.getElementById('gitName').value = match[1];
+      }
+    });
+    document.getElementById('gitName').addEventListener('input', () => {
+      document.getElementById('gitName').dataset.userEdited = 'true';
     });
 
-    function createSite() {
-      const name = document.getElementById('siteName').value.trim();
-      const framework = document.getElementById('siteFramework').value;
-      const domain = document.getElementById('siteDomain').value.trim();
-
-      if (!name) return;
-
-      sites.push({
-        name,
-        framework,
-        domain: domain || `${name.toLowerCase().replace(/\s+/g, '-')}.test`,
-        createdAt: new Date().toISOString(),
-      });
-
-      saveSites();
-      renderSites();
-      closeNewSiteModal();
+    function appendLog(text) {
+      const log = document.getElementById('progressLog');
+      log.textContent += text + '\n';
+      log.scrollTop = log.scrollHeight;
     }
 
-    function deleteSite(index) {
-      sites.splice(index, 1);
-      saveSites();
-      renderSites();
+    async function createSite() {
+      if (currentSource === 'laravel') {
+        await createLaravelProject();
+      } else {
+        await cloneGitProject();
+      }
+    }
+
+    async function createLaravelProject() {
+      const name = document.getElementById('laravelName').value.trim();
+      if (!name) return;
+
+      const options = {
+        name,
+        starterKit: currentStarterKit,
+        database: document.getElementById('laravelDatabase').value,
+        testing: document.getElementById('laravelTesting').value,
+        git: document.getElementById('laravelGit').checked,
+      };
+
+      if (currentStarterKit === 'breeze') {
+        options.stack = document.getElementById('breezeStack').value;
+        options.dark = document.getElementById('breezeDark').checked;
+        options.ssr = document.getElementById('breezeSSR').checked;
+        options.typescript = document.getElementById('breezeTypescript').checked;
+      } else if (currentStarterKit === 'jetstream') {
+        options.stack = document.getElementById('jetstreamStack').value;
+        options.teams = document.getElementById('jetstreamTeams').checked;
+        options.dark = document.getElementById('jetstreamDark').checked;
+        options.ssr = document.getElementById('jetstreamSSR').checked;
+      }
+
+      showProgress('Creating Laravel project...');
+      const createBtn = document.getElementById('createSiteBtn');
+      createBtn.disabled = true;
+
+      window.api.onCreationOutput((data) => appendLog(data));
+
+      const result = await window.api.createLaravelProject(options);
+
+      if (result.success) {
+        document.getElementById('progressStatus').textContent = 'Project created successfully!';
+        document.getElementById('progressBar').style.width = '100%';
+        sites.push({
+          name: options.name,
+          framework: 'laravel',
+          domain: `${options.name}.test`,
+          path: result.path,
+          createdAt: new Date().toISOString(),
+        });
+        saveSites();
+        renderSites();
+      } else {
+        document.getElementById('progressStatus').textContent = 'Creation failed';
+        document.getElementById('progressBar').style.width = '100%';
+        document.getElementById('progressBar').style.background = 'var(--error)';
+      }
+
+      document.getElementById('progressActions').style.display = 'flex';
+      createBtn.disabled = false;
+      window.api.offCreationOutput();
+    }
+
+    async function cloneGitProject() {
+      const url = document.getElementById('gitUrl').value.trim();
+      if (!url) return;
+
+      const name = document.getElementById('gitName').value.trim() ||
+        (url.match(/\/([^/]+?)(\.git)?$/) || [])[1] || 'project';
+
+      showProgress('Cloning repository...');
+      const createBtn = document.getElementById('createSiteBtn');
+      createBtn.disabled = true;
+
+      window.api.onCreationOutput((data) => appendLog(data));
+
+      const result = await window.api.cloneGitProject({ url, name });
+
+      if (result.success) {
+        document.getElementById('progressStatus').textContent = 'Project cloned and set up!';
+        document.getElementById('progressBar').style.width = '100%';
+        sites.push({
+          name,
+          framework: 'laravel',
+          domain: `${name}.test`,
+          path: result.path,
+          createdAt: new Date().toISOString(),
+        });
+        saveSites();
+        renderSites();
+      } else {
+        document.getElementById('progressStatus').textContent = 'Clone failed';
+        document.getElementById('progressBar').style.width = '100%';
+        document.getElementById('progressBar').style.background = 'var(--error)';
+      }
+
+      document.getElementById('progressActions').style.display = 'flex';
+      createBtn.disabled = false;
+      window.api.offCreationOutput();
+    }
+
+    function showProgress(msg) {
+      document.getElementById('newSiteForm').style.display = 'none';
+      const progress = document.getElementById('creationProgress');
+      progress.classList.add('visible');
+      document.getElementById('progressStatus').textContent = msg;
+      document.getElementById('progressBar').style.width = '20%';
+      document.getElementById('progressBar').style.background = '';
+      document.getElementById('progressLog').textContent = '';
+    }
+
+    function toggleSiteDropdown(event, index) {
+      event.stopPropagation();
+      const dropdown = document.getElementById(`dropdown-${index}`);
+      const wasVisible = dropdown.classList.contains('visible');
+      closeAllDropdowns();
+      if (!wasVisible) dropdown.classList.add('visible');
+    }
+
+    function closeAllDropdowns() {
+      document.querySelectorAll('.site-dropdown').forEach(d => d.classList.remove('visible'));
+    }
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.site-dropdown')) {
+        closeAllDropdowns();
+      }
+    });
+
+    function siteAction(event, action, index) {
+      event.stopPropagation();
+      closeAllDropdowns();
+      const site = sites[index];
+      switch (action) {
+        case 'view':
+          window.api.openInBrowser(site.domain || `${site.name}.test`);
+          break;
+        case 'editor':
+          window.api.openInEditor(site.path);
+          break;
+        case 'terminal':
+          window.api.openInTerminal(site.path);
+          break;
+        case 'delete':
+          sites.splice(index, 1);
+          saveSites();
+          renderSites();
+          break;
+      }
+    }
+
+    // ── Settings ──
+    let parkedDirs = [];
+
+    function switchSettings(panelId) {
+      document.querySelectorAll('.settings-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.settings-nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById(`settings-${panelId}`).classList.add('active');
+      document.querySelector(`.settings-nav-item[data-settings="${panelId}"]`).classList.add('active');
+    }
+
+    async function loadParkedDirs() {
+      parkedDirs = await window.api.getParkedDirs();
+      renderParkedDirs();
+    }
+
+    function renderParkedDirs() {
+      const list = document.getElementById('dirList');
+      if (parkedDirs.length === 0) {
+        list.innerHTML = '';
+        return;
+      }
+      list.innerHTML = parkedDirs.map((dir, i) => `
+        <div class="dir-card">
+          <div class="dir-card-icon">
+            <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <div class="dir-card-info">
+            <div class="dir-card-path">${dir.path}</div>
+            <div class="dir-card-status parked">Parked</div>
+          </div>
+          <button class="dir-card-remove" title="Unpark and remove" onclick="removeParkedDir(${i})">
+            <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      `).join('');
+    }
+
+    async function addParkedDirectory() {
+      const result = await window.api.selectDirectory();
+      if (!result) return;
+
+      // Check if already parked
+      if (parkedDirs.some(d => d.path === result)) return;
+
+      // Add temp card with parking status
+      const list = document.getElementById('dirList');
+      const tempCard = document.createElement('div');
+      tempCard.className = 'dir-card';
+      tempCard.innerHTML = `
+        <div class="dir-card-icon">
+          <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div class="dir-card-info">
+          <div class="dir-card-path">${result}</div>
+          <div class="dir-card-status parking">Parking<span class="waiting-dots"></span></div>
+        </div>
+        <div class="dep-status"><div class="spinner"></div></div>
+      `;
+      list.appendChild(tempCard);
+
+      const parkResult = await window.api.parkDirectory(result);
+      tempCard.remove();
+
+      if (parkResult.success) {
+        parkedDirs.push({ path: result });
+        await window.api.saveParkedDirs(parkedDirs);
+        renderParkedDirs();
+      } else {
+        // Show error briefly
+        const errCard = document.createElement('div');
+        errCard.className = 'dir-card';
+        errCard.innerHTML = `
+          <div class="dir-card-icon">
+            <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <div class="dir-card-info">
+            <div class="dir-card-path">${result}</div>
+            <div class="dir-card-status error">Failed to park: ${parkResult.output || 'Unknown error'}</div>
+          </div>
+        `;
+        list.appendChild(errCard);
+        setTimeout(() => errCard.remove(), 4000);
+      }
+    }
+
+    async function removeParkedDir(index) {
+      const dir = parkedDirs[index];
+      const cards = document.querySelectorAll('#dirList .dir-card');
+      const card = cards[index];
+
+      // Show unparking state
+      const statusEl = card.querySelector('.dir-card-status');
+      statusEl.className = 'dir-card-status parking';
+      statusEl.innerHTML = 'Unparking<span class="waiting-dots"></span>';
+      const removeBtn = card.querySelector('.dir-card-remove');
+      removeBtn.disabled = true;
+      removeBtn.style.opacity = '0.3';
+
+      const result = await window.api.unparkDirectory(dir.path);
+
+      if (result.success) {
+        parkedDirs.splice(index, 1);
+        await window.api.saveParkedDirs(parkedDirs);
+        renderParkedDirs();
+      } else {
+        statusEl.className = 'dir-card-status error';
+        statusEl.textContent = 'Failed to unpark';
+        removeBtn.disabled = false;
+        removeBtn.style.opacity = '';
+      }
+    }
+
+    async function refreshValetStatus() {
+      const status = await window.api.valetStatus();
+      const container = document.getElementById('valetServiceStatus');
+      const services = [
+        { name: 'Nginx', active: status.nginx },
+        { name: 'PHP-FPM', active: status.phpFpm },
+        { name: 'dnsmasq', active: status.dnsmasq },
+      ];
+      container.innerHTML = services.map(s => `
+        <span style="
+          padding: 4px 10px; border-radius: 12px; font-size: 10px; font-weight: 600;
+          background: ${s.active ? 'rgba(0,210,160,0.15)' : 'rgba(255,107,107,0.15)'};
+          color: ${s.active ? 'var(--success)' : 'var(--error)'};
+        ">${s.name}: ${s.active ? 'Running' : 'Stopped'}</span>
+      `).join('');
+    }
+
+    async function valetStart() {
+      const btn = document.getElementById('valetStartBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner" style="width:14px;height:14px;border-width:2px;display:inline-block;vertical-align:middle;"></div> Starting...';
+      await window.api.valetStart();
+      await refreshValetStatus();
+      btn.disabled = false;
+      btn.innerHTML = '<svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:currentColor;stroke:none;"><polygon points="5 3 19 12 5 21 5 3"/></svg> Start Services';
+    }
+
+    async function valetStop() {
+      const btn = document.getElementById('valetStopBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner" style="width:14px;height:14px;border-width:2px;display:inline-block;vertical-align:middle;"></div> Stopping...';
+      await window.api.valetStop();
+      await refreshValetStatus();
+      btn.disabled = false;
+      btn.innerHTML = '<svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:currentColor;stroke:none;"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> Stop Services';
+    }
+
+    async function fixDns() {
+      const btn = document.getElementById('fixDnsBtn');
+      btn.innerHTML = '<div class="spinner" style="width:14px;height:14px;border-width:2px;display:inline-block;vertical-align:middle;"></div> Fixing DNS...';
+      btn.style.pointerEvents = 'none';
+      btn.style.opacity = '0.6';
+
+      const result = await window.api.fixDns();
+      await refreshValetStatus();
+
+      if (result.success) {
+        btn.innerHTML = `<svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--success);stroke-width:2;fill:none;"><polyline points="20 6 9 17 4 12"/></svg> DNS Fixed!`;
+        btn.style.borderColor = 'var(--success)';
+        btn.style.color = 'var(--success)';
+      } else {
+        btn.innerHTML = `<svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--error);stroke-width:2;fill:none;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Failed: ${result.output || 'Unknown error'}`;
+        btn.style.borderColor = 'var(--error)';
+        btn.style.color = 'var(--error)';
+      }
+
+      setTimeout(() => {
+        btn.innerHTML = `<svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Fix DNS &amp; Restart dnsmasq`;
+        btn.style.pointerEvents = '';
+        btn.style.opacity = '';
+        btn.style.borderColor = '';
+        btn.style.color = '';
+      }, 3000);
     }
 
     // ── Boot ──
