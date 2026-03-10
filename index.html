@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fleetly</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg-primary: #0f0f1a;
+      --bg-secondary: #1a1a2e;
+      --bg-card: #16213e;
+      --bg-sidebar: #12122a;
+      --accent: #6c63ff;
+      --accent-glow: rgba(108, 99, 255, 0.3);
+      --success: #00d2a0;
+      --error: #ff6b6b;
+      --warning: #ffbd2e;
+      --text-primary: #e8e8f0;
+      --text-secondary: #8888a0;
+      --border: rgba(108, 99, 255, 0.15);
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: transparent;
+      color: var(--text-primary);
+      overflow: hidden;
+      -webkit-app-region: drag;
+    }
+
+    .app-container {
+      width: 900px;
+      height: 620px;
+      border-radius: 16px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+    }
+
+    /* Background animated gradient */
+    .bg-glow {
+      position: absolute; border-radius: 50%;
+      filter: blur(100px); opacity: 0.12;
+      pointer-events: none; z-index: 0;
+    }
+    .bg-glow-1 {
+      width: 350px; height: 350px; background: #6c63ff;
+      top: -80px; left: -80px;
+      animation: float1 8s ease-in-out infinite;
+    }
+    .bg-glow-2 {
+      width: 300px; height: 300px; background: #00d2a0;
+      bottom: -100px; right: -80px;
+      animation: float2 10s ease-in-out infinite;
+    }
+    @keyframes float1 {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(50px, 30px); }
+    }
+    @keyframes float2 {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(-30px, -50px); }
+    }
+
+    /* ── Title bar ── */
+    .titlebar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 20px; position: relative; z-index: 10;
+      border-bottom: 1px solid var(--border);
+    }
+    .titlebar-dots { display: flex; gap: 8px; }
+    .dot {
+      width: 12px; height: 12px; border-radius: 50%;
+      -webkit-app-region: no-drag; cursor: pointer;
+    }
+    .dot-red { background: #ff5f57; }
+    .dot-yellow { background: #ffbd2e; }
+    .dot-green { background: #28ca42; }
+    .titlebar-text { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+
+    /* ══════════════════════════════════════════
+       SPLASH SCREEN
+       ══════════════════════════════════════════ */
+    #splash {
+      position: absolute; inset: 0; display: flex;
+      flex-direction: column; align-items: center; justify-content: center;
+      z-index: 100; background: var(--bg-primary);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    #splash.hidden { opacity: 0; transform: scale(1.05); pointer-events: none; }
+
+    .splash-logo { width: 90px; height: 90px; position: relative; margin-bottom: 30px; }
+    .splash-ring {
+      position: absolute; inset: 0; border: 3px solid transparent;
+      border-top-color: var(--accent); border-radius: 50%;
+      animation: spin 1.2s linear infinite;
+    }
+    .splash-ring:nth-child(2) { inset: 10px; border-top-color: var(--success); animation-duration: 1.8s; animation-direction: reverse; }
+    .splash-ring:nth-child(3) { inset: 20px; border-top-color: #ff6b6b; animation-duration: 2.4s; }
+    .splash-core {
+      position: absolute; inset: 30px;
+      background: linear-gradient(135deg, var(--accent), #00d2a0);
+      border-radius: 50%; animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.1); opacity: 1; }
+    }
+    .splash-title {
+      font-size: 32px; font-weight: 700; letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--accent), var(--success));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+    .splash-subtitle { font-size: 14px; color: var(--text-secondary); }
+    .splash-loader { margin-top: 40px; width: 200px; height: 3px; background: var(--bg-secondary); border-radius: 3px; overflow: hidden; }
+    .splash-loader-bar {
+      width: 0%; height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--success));
+      border-radius: 3px; animation: loading 2s ease-in-out forwards;
+    }
+    @keyframes loading {
+      0% { width: 0%; } 30% { width: 40%; } 60% { width: 70%; } 100% { width: 100%; }
+    }
+
+    /* ══════════════════════════════════════════
+       SETUP / DEP CHECK SCREEN
+       ══════════════════════════════════════════ */
+    #setup {
+      display: none; position: relative; z-index: 10;
+      padding: 30px 50px 40px; opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    #setup.visible { display: block; opacity: 1; }
+
+    .setup-header { text-align: center; margin-bottom: 30px; }
+    .setup-header h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    .setup-header p { color: var(--text-secondary); font-size: 13px; }
+
+    .dep-list { display: flex; flex-direction: column; gap: 12px; }
+    .dep-card {
+      display: flex; align-items: center; gap: 14px;
+      padding: 16px 20px; background: var(--bg-card);
+      border: 1px solid var(--border); border-radius: 10px;
+      opacity: 0; transform: translateY(16px);
+      transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .dep-card.visible { opacity: 1; transform: translateY(0); }
+    .dep-card.checking { border-color: var(--accent); box-shadow: 0 0 16px var(--accent-glow); }
+    .dep-card.success { border-color: rgba(0, 210, 160, 0.25); }
+    .dep-card.error { border-color: rgba(255, 107, 107, 0.25); }
+    .dep-card.installing { border-color: rgba(108, 99, 255, 0.4); box-shadow: 0 0 12px var(--accent-glow); }
+
+    .dep-icon {
+      width: 40px; height: 40px; border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 700; flex-shrink: 0; color: white;
+    }
+    .dep-icon.php { background: linear-gradient(135deg, #4f5b93, #777bb4); }
+    .dep-icon.node { background: linear-gradient(135deg, #215732, #3c873a); }
+    .dep-icon.mysql { background: linear-gradient(135deg, #00546b, #0074a2); }
+    .dep-icon.nginx { background: linear-gradient(135deg, #006400, #009639); }
+
+    .dep-info { flex: 1; }
+    .dep-name { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .dep-version { font-size: 11px; color: var(--text-secondary); }
+    .dep-version.install-status { color: var(--accent); }
+    .dep-version.install-success { color: var(--success); }
+    .dep-version.install-failed { color: var(--error); }
+
+    .dep-status { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+    .spinner { width: 22px; height: 22px; border: 3px solid var(--bg-secondary); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+
+    .status-icon {
+      width: 26px; height: 26px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .status-icon.success { background: var(--success); }
+    .status-icon.error { background: var(--error); }
+    .status-icon svg { width: 14px; height: 14px; stroke: white; stroke-width: 2.5; fill: none; }
+    @keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+
+    .summary {
+      margin-top: 20px; padding: 14px 20px; background: var(--bg-card);
+      border: 1px solid var(--border); border-radius: 10px;
+      display: flex; align-items: center; justify-content: space-between;
+      opacity: 0; transform: translateY(8px); transition: all 0.5s ease;
+    }
+    .summary.visible { opacity: 1; transform: translateY(0); }
+    .summary-text { font-size: 13px; font-weight: 500; }
+    .summary-badge { padding: 5px 12px; border-radius: 16px; font-size: 11px; font-weight: 600; }
+    .summary-badge.all-good { background: rgba(0, 210, 160, 0.15); color: var(--success); }
+    .summary-badge.issues { background: rgba(255, 107, 107, 0.15); color: var(--error); }
+
+    .install-btn {
+      padding: 5px 12px; border-radius: 7px; border: none;
+      font-size: 11px; font-weight: 600; cursor: pointer;
+      -webkit-app-region: no-drag; transition: all 0.2s ease;
+      background: var(--accent); color: white;
+      animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .install-btn:hover { background: #5a52e0; transform: scale(1.05); }
+    .install-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .install-all-btn {
+      padding: 8px 20px; border-radius: 8px; border: none;
+      font-size: 12px; font-weight: 600; cursor: pointer;
+      -webkit-app-region: no-drag;
+      background: linear-gradient(135deg, var(--accent), #8b83ff); color: white;
+      transition: all 0.3s ease;
+      animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .install-all-btn:hover { transform: scale(1.05); box-shadow: 0 4px 20px var(--accent-glow); }
+    .install-all-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .continue-btn {
+      display: none; margin: 20px auto 0; padding: 10px 32px;
+      border-radius: 10px; border: none; font-size: 13px; font-weight: 600;
+      cursor: pointer; -webkit-app-region: no-drag;
+      background: linear-gradient(135deg, var(--accent), var(--success)); color: white;
+      transition: all 0.3s ease;
+      animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .continue-btn.visible { display: block; }
+    .continue-btn:hover { transform: scale(1.05); box-shadow: 0 4px 24px var(--accent-glow); }
+
+    .waiting-dots::after { content: ''; animation: dots 1.5s steps(4) infinite; }
+    @keyframes dots { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ══════════════════════════════════════════
+       DASHBOARD (main app after setup)
+       ══════════════════════════════════════════ */
+    #app {
+      display: none; position: relative; z-index: 10;
+      height: calc(100% - 49px);
+    }
+    #app.visible { display: flex; animation: fadeIn 0.4s ease; }
+
+    /* Sidebar */
+    .sidebar {
+      width: 200px; background: var(--bg-sidebar);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      padding: 16px 0; flex-shrink: 0;
+    }
+    .sidebar-brand {
+      padding: 0 18px 18px; border-bottom: 1px solid var(--border);
+      margin-bottom: 12px;
+    }
+    .sidebar-brand-name {
+      font-size: 18px; font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), var(--success));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .sidebar-brand-tag { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
+
+    .sidebar-nav { flex: 1; display: flex; flex-direction: column; gap: 2px; padding: 0 8px; }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 8px;
+      font-size: 13px; font-weight: 500; color: var(--text-secondary);
+      cursor: pointer; -webkit-app-region: no-drag;
+      transition: all 0.15s ease; border: 1px solid transparent;
+    }
+    .nav-item:hover { background: rgba(108, 99, 255, 0.08); color: var(--text-primary); }
+    .nav-item.active {
+      background: rgba(108, 99, 255, 0.12); color: var(--text-primary);
+      border-color: var(--border);
+    }
+    .nav-item svg {
+      width: 18px; height: 18px; stroke: currentColor;
+      stroke-width: 1.8; fill: none; flex-shrink: 0;
+    }
+    .nav-item .nav-badge {
+      margin-left: auto; padding: 2px 7px; border-radius: 10px;
+      font-size: 10px; font-weight: 600;
+      background: rgba(108, 99, 255, 0.2); color: var(--accent);
+    }
+
+    .sidebar-footer {
+      padding: 12px 18px; border-top: 1px solid var(--border);
+      margin-top: auto;
+    }
+    .sidebar-footer-btn {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 12px; color: var(--text-secondary);
+      cursor: pointer; -webkit-app-region: no-drag;
+      transition: color 0.15s ease;
+    }
+    .sidebar-footer-btn:hover { color: var(--text-primary); }
+    .sidebar-footer-btn svg {
+      width: 16px; height: 16px; stroke: currentColor;
+      stroke-width: 1.8; fill: none;
+    }
+
+    /* Content area */
+    .content { flex: 1; padding: 28px 32px; overflow-y: auto; position: relative; }
+    .content::-webkit-scrollbar { width: 6px; }
+    .content::-webkit-scrollbar-track { background: transparent; }
+    .content::-webkit-scrollbar-thumb { background: var(--bg-secondary); border-radius: 3px; }
+
+    .page { display: none; }
+    .page.active { display: block; animation: fadeIn 0.3s ease; }
+
+    /* Sites page */
+    .page-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .page-header h2 { font-size: 20px; font-weight: 700; }
+    .page-header p { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+    .btn-primary {
+      display: flex; align-items: center; gap: 7px;
+      padding: 9px 18px; border-radius: 9px; border: none;
+      font-size: 12px; font-weight: 600; cursor: pointer;
+      -webkit-app-region: no-drag;
+      background: var(--accent); color: white;
+      transition: all 0.2s ease;
+    }
+    .btn-primary:hover { background: #5a52e0; transform: translateY(-1px); box-shadow: 0 4px 16px var(--accent-glow); }
+    .btn-primary svg { width: 15px; height: 15px; stroke: currentColor; stroke-width: 2; fill: none; }
+
+    /* Sites empty state */
+    .empty-state {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 60px 20px; text-align: center;
+    }
+    .empty-state-icon {
+      width: 64px; height: 64px; border-radius: 16px;
+      background: var(--bg-card); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 18px;
+    }
+    .empty-state-icon svg { width: 28px; height: 28px; stroke: var(--text-secondary); stroke-width: 1.5; fill: none; }
+    .empty-state h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+    .empty-state p { font-size: 12px; color: var(--text-secondary); max-width: 280px; line-height: 1.6; }
+
+    /* Sites list */
+    .sites-grid { display: flex; flex-direction: column; gap: 10px; }
+    .site-card {
+      display: flex; align-items: center; gap: 14px;
+      padding: 16px 18px; background: var(--bg-card);
+      border: 1px solid var(--border); border-radius: 10px;
+      transition: all 0.2s ease; cursor: pointer;
+      -webkit-app-region: no-drag;
+    }
+    .site-card:hover { border-color: rgba(108, 99, 255, 0.3); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
+    .site-avatar {
+      width: 38px; height: 38px; border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 700; color: white; flex-shrink: 0;
+    }
+    .site-info { flex: 1; min-width: 0; }
+    .site-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .site-path { font-size: 11px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .site-status {
+      padding: 4px 10px; border-radius: 12px;
+      font-size: 10px; font-weight: 600; flex-shrink: 0;
+    }
+    .site-status.running { background: rgba(0, 210, 160, 0.15); color: var(--success); }
+    .site-status.stopped { background: rgba(136, 136, 160, 0.15); color: var(--text-secondary); }
+    .site-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .site-action-btn {
+      width: 30px; height: 30px; border-radius: 7px; border: 1px solid var(--border);
+      background: transparent; color: var(--text-secondary);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.15s ease;
+    }
+    .site-action-btn:hover { border-color: var(--accent); color: var(--text-primary); background: rgba(108,99,255,0.08); }
+    .site-action-btn svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2; fill: none; }
+
+    /* Modal overlay */
+    .modal-overlay {
+      display: none; position: absolute; inset: 0;
+      background: rgba(15, 15, 26, 0.8);
+      z-index: 50; align-items: center; justify-content: center;
+    }
+    .modal-overlay.visible { display: flex; animation: fadeIn 0.2s ease; }
+    .modal {
+      background: var(--bg-secondary); border: 1px solid var(--border);
+      border-radius: 14px; padding: 28px; width: 380px;
+      -webkit-app-region: no-drag;
+    }
+    .modal h3 { font-size: 16px; font-weight: 700; margin-bottom: 18px; }
+    .modal-field { margin-bottom: 14px; }
+    .modal-field label { display: block; font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-bottom: 6px; }
+    .modal-field input, .modal-field select {
+      width: 100%; padding: 9px 12px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--bg-card);
+      color: var(--text-primary); font-size: 13px; font-family: inherit;
+      outline: none; transition: border-color 0.2s;
+    }
+    .modal-field input:focus, .modal-field select:focus { border-color: var(--accent); }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+    .btn-ghost {
+      padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border);
+      background: transparent; color: var(--text-secondary); font-size: 12px;
+      font-weight: 500; cursor: pointer; font-family: inherit;
+      -webkit-app-region: no-drag; transition: all 0.15s ease;
+    }
+    .btn-ghost:hover { border-color: var(--text-secondary); color: var(--text-primary); }
+    .btn-modal-primary {
+      padding: 8px 18px; border-radius: 8px; border: none;
+      background: var(--accent); color: white; font-size: 12px;
+      font-weight: 600; cursor: pointer; font-family: inherit;
+      -webkit-app-region: no-drag; transition: all 0.15s ease;
+    }
+    .btn-modal-primary:hover { background: #5a52e0; }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+
+    <!-- Splash Screen -->
+    <div id="splash">
+      <div class="splash-logo">
+        <div class="splash-ring"></div>
+        <div class="splash-ring"></div>
+        <div class="splash-ring"></div>
+        <div class="splash-core"></div>
+      </div>
+      <div class="splash-title">Fleetly</div>
+      <div class="splash-subtitle">Checking your dev environment</div>
+      <div class="splash-loader"><div class="splash-loader-bar"></div></div>
+    </div>
+
+    <!-- Title bar -->
+    <div class="titlebar">
+      <div class="titlebar-dots">
+        <div class="dot dot-red" onclick="window.close()"></div>
+        <div class="dot dot-yellow"></div>
+        <div class="dot dot-green"></div>
+      </div>
+      <div class="titlebar-text">Fleetly</div>
+      <div style="width: 52px;"></div>
+    </div>
+
+    <!-- ── Setup / Dependency Check ── -->
+    <div id="setup">
+      <div class="setup-header">
+        <h1>System Dependencies</h1>
+        <p>Checking required tools for web development</p>
+      </div>
+      <div class="dep-list" id="depList">
+        <div class="dep-card" id="card-php">
+          <div class="dep-icon php">P</div>
+          <div class="dep-info"><div class="dep-name">PHP</div><div class="dep-version" id="ver-php"><span class="waiting-dots">Waiting</span></div></div>
+          <div class="dep-status" id="status-php"></div>
+        </div>
+        <div class="dep-card" id="card-node">
+          <div class="dep-icon node">N</div>
+          <div class="dep-info"><div class="dep-name">Node.js</div><div class="dep-version" id="ver-node"><span class="waiting-dots">Waiting</span></div></div>
+          <div class="dep-status" id="status-node"></div>
+        </div>
+        <div class="dep-card" id="card-mysql">
+          <div class="dep-icon mysql">M</div>
+          <div class="dep-info"><div class="dep-name">MySQL</div><div class="dep-version" id="ver-mysql"><span class="waiting-dots">Waiting</span></div></div>
+          <div class="dep-status" id="status-mysql"></div>
+        </div>
+        <div class="dep-card" id="card-nginx">
+          <div class="dep-icon nginx">Nx</div>
+          <div class="dep-info"><div class="dep-name">Nginx</div><div class="dep-version" id="ver-nginx"><span class="waiting-dots">Waiting</span></div></div>
+          <div class="dep-status" id="status-nginx"></div>
+        </div>
+      </div>
+      <div class="summary" id="summary">
+        <div class="summary-text" id="summaryText"></div>
+        <div class="summary-badge" id="summaryBadge"></div>
+      </div>
+      <button class="continue-btn" id="continueBtn" onclick="transitionToApp()">Continue to Dashboard</button>
+    </div>
+
+    <!-- ── Main Dashboard App ── -->
+    <div id="app">
+      <div class="sidebar">
+        <div class="sidebar-brand">
+          <div class="sidebar-brand-name">Fleetly</div>
+          <div class="sidebar-brand-tag">Dev Environment Manager</div>
+        </div>
+        <div class="sidebar-nav">
+          <div class="nav-item active" data-page="sites" onclick="switchPage('sites')">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            Sites
+            <span class="nav-badge" id="siteCount">0</span>
+          </div>
+          <div class="nav-item" data-page="services" onclick="switchPage('services')">
+            <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+            Services
+          </div>
+          <div class="nav-item" data-page="settings" onclick="switchPage('settings')">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            Settings
+          </div>
+        </div>
+        <div class="sidebar-footer">
+          <div class="sidebar-footer-btn" onclick="rerunSetup()">
+            <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Re-check Deps
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <!-- Sites Page -->
+        <div class="page active" id="page-sites">
+          <div class="page-header">
+            <div>
+              <h2>Sites</h2>
+              <p>Manage your local development websites</p>
+            </div>
+            <button class="btn-primary" onclick="openNewSiteModal()">
+              <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              New Site
+            </button>
+          </div>
+          <div id="sitesContent">
+            <div class="empty-state" id="emptyState">
+              <div class="empty-state-icon">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              </div>
+              <h3>No sites yet</h3>
+              <p>Create your first site to start building. Fleetly will configure Nginx and set everything up for you.</p>
+            </div>
+            <div class="sites-grid" id="sitesGrid" style="display:none;"></div>
+          </div>
+        </div>
+
+        <!-- Services Page -->
+        <div class="page" id="page-services">
+          <div class="page-header">
+            <div><h2>Services</h2><p>Manage running services</p></div>
+          </div>
+          <div class="empty-state">
+            <div class="empty-state-icon">
+              <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+            </div>
+            <h3>Coming soon</h3>
+            <p>Service management will be available in a future update.</p>
+          </div>
+        </div>
+
+        <!-- Settings Page -->
+        <div class="page" id="page-settings">
+          <div class="page-header">
+            <div><h2>Settings</h2><p>Configure Fleetly preferences</p></div>
+          </div>
+          <div class="empty-state">
+            <div class="empty-state-icon">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            </div>
+            <h3>Coming soon</h3>
+            <p>Settings will be available in a future update.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- New Site Modal -->
+      <div class="modal-overlay" id="newSiteModal">
+        <div class="modal">
+          <h3>Create New Site</h3>
+          <div class="modal-field">
+            <label>Site Name</label>
+            <input type="text" id="siteName" placeholder="my-awesome-project">
+          </div>
+          <div class="modal-field">
+            <label>Framework</label>
+            <select id="siteFramework">
+              <option value="laravel">Laravel (PHP)</option>
+              <option value="vanilla-php">Vanilla PHP</option>
+              <option value="node">Node.js / Express</option>
+              <option value="static">Static HTML</option>
+            </select>
+          </div>
+          <div class="modal-field">
+            <label>Local Domain</label>
+            <input type="text" id="siteDomain" placeholder="my-project.test">
+          </div>
+          <div class="modal-actions">
+            <button class="btn-ghost" onclick="closeNewSiteModal()">Cancel</button>
+            <button class="btn-modal-primary" onclick="createSite()">Create Site</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const checkSvg = `<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`;
+    const crossSvg = `<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
+
+    let missingDeps = [];
+    let sites = [];
+
+    const frameworkColors = {
+      'laravel': 'linear-gradient(135deg, #e3342f, #ff6b6b)',
+      'vanilla-php': 'linear-gradient(135deg, #4f5b93, #777bb4)',
+      'node': 'linear-gradient(135deg, #215732, #3c873a)',
+      'static': 'linear-gradient(135deg, #e44d26, #f16529)',
+    };
+    const frameworkLabels = {
+      'laravel': 'LV', 'vanilla-php': 'PH', 'node': 'Nd', 'static': 'HT',
+    };
+
+    // ── App Start ──
+    async function start() {
+      const setupDone = await window.api.isSetupComplete();
+
+      if (setupDone) {
+        document.getElementById('splash').classList.add('hidden');
+        await new Promise(r => setTimeout(r, 300));
+        showApp();
+        return;
+      }
+
+      // First run: splash → dep check
+      await new Promise(r => setTimeout(r, 2200));
+      document.getElementById('splash').classList.add('hidden');
+
+      setTimeout(() => {
+        const setup = document.getElementById('setup');
+        setup.classList.add('visible');
+        const cards = document.querySelectorAll('.dep-card');
+        cards.forEach((card, i) => setTimeout(() => card.classList.add('visible'), i * 100));
+        setTimeout(() => runChecks(), 500);
+      }, 600);
+    }
+
+    async function showApp() {
+      document.getElementById('setup').style.display = 'none';
+      document.getElementById('setup').classList.remove('visible');
+      document.getElementById('app').style.display = '';
+      document.getElementById('app').classList.add('visible');
+      await loadSites();
+    }
+
+    function transitionToApp() {
+      const setup = document.getElementById('setup');
+      setup.style.transition = 'opacity 0.4s ease';
+      setup.style.opacity = '0';
+      setTimeout(() => {
+        setup.style.display = 'none';
+        showApp();
+      }, 400);
+    }
+
+    // ── Dependency Checks ──
+    async function runChecks() {
+      const results = await window.api.checkDependencies();
+      missingDeps = [];
+
+      for (const dep of results) {
+        const key = dep.icon;
+        const card = document.getElementById(`card-${key}`);
+        const verEl = document.getElementById(`ver-${key}`);
+        const statusEl = document.getElementById(`status-${key}`);
+
+        card.classList.add('checking');
+        statusEl.innerHTML = '<div class="spinner"></div>';
+        verEl.innerHTML = 'Checking...';
+        await new Promise(r => setTimeout(r, 300));
+        card.classList.remove('checking');
+
+        if (dep.installed) {
+          card.classList.add('success'); card.classList.remove('error');
+          verEl.textContent = dep.version.split('\n')[0];
+          statusEl.innerHTML = `<div class="status-icon success">${checkSvg}</div>`;
+        } else {
+          card.classList.add('error');
+          verEl.textContent = 'Not installed';
+          statusEl.innerHTML = `<div class="status-icon error">${crossSvg}</div>`;
+          missingDeps.push(dep);
+        }
+      }
+
+      const installed = results.filter(r => r.installed).length;
+      const total = results.length;
+      const summaryEl = document.getElementById('summary');
+      document.getElementById('summaryText').textContent = `${installed} of ${total} dependencies found`;
+
+      const badgeEl = document.getElementById('summaryBadge');
+      if (installed === total) {
+        badgeEl.textContent = 'All Good';
+        badgeEl.className = 'summary-badge all-good';
+        await window.api.markSetupComplete();
+        document.getElementById('continueBtn').classList.add('visible');
+      } else {
+        badgeEl.textContent = `${total - installed} Missing`;
+        badgeEl.className = 'summary-badge issues';
+      }
+
+      setTimeout(() => summaryEl.classList.add('visible'), 200);
+
+      if (missingDeps.length > 0) {
+        setTimeout(() => showInstallOptions(), 400);
+      }
+    }
+
+    function showInstallOptions() {
+      if (missingDeps.length === 1) {
+        const dep = missingDeps[0];
+        document.getElementById(`status-${dep.icon}`).innerHTML =
+          `<button class="install-btn" onclick="installSingle('${dep.icon}')">Install</button>`;
+      } else {
+        for (const dep of missingDeps) {
+          document.getElementById(`status-${dep.icon}`).innerHTML =
+            `<button class="install-btn" onclick="installSingle('${dep.icon}')" disabled>Install</button>`;
+        }
+        const summaryEl = document.getElementById('summary');
+        if (!document.getElementById('installAllBtn')) {
+          const btn = document.createElement('button');
+          btn.id = 'installAllBtn';
+          btn.className = 'install-all-btn';
+          btn.textContent = `Install All (${missingDeps.length})`;
+          btn.onclick = installAll;
+          summaryEl.appendChild(btn);
+        }
+      }
+    }
+
+    async function installSingle(depKey) {
+      const card = document.getElementById(`card-${depKey}`);
+      const verEl = document.getElementById(`ver-${depKey}`);
+      const statusEl = document.getElementById(`status-${depKey}`);
+
+      card.classList.remove('error'); card.classList.add('installing');
+      verEl.innerHTML = '<span class="waiting-dots">Installing</span>';
+      verEl.className = 'dep-version install-status';
+      statusEl.innerHTML = '<div class="spinner"></div>';
+
+      const result = await window.api.installDependency(depKey);
+      card.classList.remove('installing');
+
+      if (result.success) {
+        card.classList.add('success');
+        verEl.textContent = 'Installed';
+        verEl.className = 'dep-version install-success';
+        statusEl.innerHTML = `<div class="status-icon success">${checkSvg}</div>`;
+        missingDeps = missingDeps.filter(d => d.icon !== depKey);
+        updateSummaryAfterInstall();
+      } else {
+        card.classList.add('error');
+        verEl.textContent = 'Install failed';
+        verEl.className = 'dep-version install-failed';
+        statusEl.innerHTML = `<div class="status-icon error">${crossSvg}</div>`;
+      }
+    }
+
+    async function installAll() {
+      const btn = document.getElementById('installAllBtn');
+      btn.disabled = true; btn.textContent = 'Installing...';
+      const keys = missingDeps.map(d => d.icon);
+
+      for (const dep of missingDeps) {
+        const card = document.getElementById(`card-${dep.icon}`);
+        const verEl = document.getElementById(`ver-${dep.icon}`);
+        card.classList.remove('error'); card.classList.add('installing');
+        verEl.innerHTML = '<span class="waiting-dots">Queued</span>';
+        verEl.className = 'dep-version install-status';
+        document.getElementById(`status-${dep.icon}`).innerHTML = '';
+      }
+
+      const results = await window.api.installMultiple(keys);
+      for (const result of results) {
+        const card = document.getElementById(`card-${result.depKey}`);
+        const verEl = document.getElementById(`ver-${result.depKey}`);
+        const statusEl = document.getElementById(`status-${result.depKey}`);
+        card.classList.remove('installing');
+
+        if (result.success) {
+          card.classList.add('success');
+          verEl.textContent = 'Installed';
+          verEl.className = 'dep-version install-success';
+          statusEl.innerHTML = `<div class="status-icon success">${checkSvg}</div>`;
+          missingDeps = missingDeps.filter(d => d.icon !== result.depKey);
+        } else {
+          card.classList.add('error');
+          verEl.textContent = 'Failed';
+          verEl.className = 'dep-version install-failed';
+          statusEl.innerHTML = `<div class="status-icon error">${crossSvg}</div>`;
+        }
+      }
+      btn.remove();
+      updateSummaryAfterInstall();
+    }
+
+    function updateSummaryAfterInstall() {
+      const total = 4;
+      const installed = total - missingDeps.length;
+      document.getElementById('summaryText').textContent = `${installed} of ${total} dependencies found`;
+      const badgeEl = document.getElementById('summaryBadge');
+
+      if (missingDeps.length === 0) {
+        badgeEl.textContent = 'All Good';
+        badgeEl.className = 'summary-badge all-good';
+        const btn = document.getElementById('installAllBtn');
+        if (btn) btn.remove();
+        window.api.markSetupComplete();
+        document.getElementById('continueBtn').classList.add('visible');
+      } else {
+        badgeEl.textContent = `${missingDeps.length} Missing`;
+        badgeEl.className = 'summary-badge issues';
+      }
+    }
+
+    async function rerunSetup() {
+      document.getElementById('app').classList.remove('visible');
+      document.getElementById('app').style.display = 'none';
+
+      const keys = ['php', 'node', 'mysql', 'nginx'];
+      for (const key of keys) {
+        const card = document.getElementById(`card-${key}`);
+        card.className = 'dep-card';
+        document.getElementById(`ver-${key}`).innerHTML = '<span class="waiting-dots">Waiting</span>';
+        document.getElementById(`ver-${key}`).className = 'dep-version';
+        document.getElementById(`status-${key}`).innerHTML = '';
+      }
+      document.getElementById('summary').classList.remove('visible');
+      document.getElementById('continueBtn').classList.remove('visible');
+      const oldBtn = document.getElementById('installAllBtn');
+      if (oldBtn) oldBtn.remove();
+
+      const setup = document.getElementById('setup');
+      setup.style.display = 'block';
+      setup.style.opacity = '1';
+      setup.style.transition = '';
+      setup.classList.add('visible');
+
+      const cards = document.querySelectorAll('.dep-card');
+      cards.forEach((card, i) => setTimeout(() => card.classList.add('visible'), i * 100));
+      setTimeout(() => runChecks(), 500);
+    }
+
+    // ── Sidebar Navigation ──
+    function switchPage(pageId) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById(`page-${pageId}`).classList.add('active');
+      document.querySelector(`.nav-item[data-page="${pageId}"]`).classList.add('active');
+    }
+
+    // ── Sites Management ──
+    async function loadSites() {
+      sites = await window.api.getSites();
+      renderSites();
+    }
+
+    function saveSites() {
+      window.api.saveSites(sites);
+    }
+
+    function renderSites() {
+      const grid = document.getElementById('sitesGrid');
+      const empty = document.getElementById('emptyState');
+      document.getElementById('siteCount').textContent = sites.length;
+
+      if (sites.length === 0) {
+        grid.style.display = 'none';
+        empty.style.display = 'flex';
+        return;
+      }
+
+      empty.style.display = 'none';
+      grid.style.display = 'flex';
+      grid.innerHTML = sites.map((site, i) => `
+        <div class="site-card">
+          <div class="site-avatar" style="background: ${frameworkColors[site.framework] || frameworkColors['static']}">
+            ${frameworkLabels[site.framework] || 'HT'}
+          </div>
+          <div class="site-info">
+            <div class="site-name">${site.name}</div>
+            <div class="site-path">${site.domain}</div>
+          </div>
+          <div class="site-status stopped">Stopped</div>
+          <div class="site-actions">
+            <button class="site-action-btn" title="Delete" onclick="deleteSite(${i})">
+              <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openNewSiteModal() {
+      document.getElementById('newSiteModal').classList.add('visible');
+      document.getElementById('siteName').value = '';
+      document.getElementById('siteDomain').value = '';
+      document.getElementById('siteName').focus();
+    }
+
+    function closeNewSiteModal() {
+      document.getElementById('newSiteModal').classList.remove('visible');
+    }
+
+    // Auto-fill domain when name changes
+    document.getElementById('siteName').addEventListener('input', (e) => {
+      const name = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
+      document.getElementById('siteDomain').value = name ? `${name}.test` : '';
+    });
+
+    function createSite() {
+      const name = document.getElementById('siteName').value.trim();
+      const framework = document.getElementById('siteFramework').value;
+      const domain = document.getElementById('siteDomain').value.trim();
+
+      if (!name) return;
+
+      sites.push({
+        name,
+        framework,
+        domain: domain || `${name.toLowerCase().replace(/\s+/g, '-')}.test`,
+        createdAt: new Date().toISOString(),
+      });
+
+      saveSites();
+      renderSites();
+      closeNewSiteModal();
+    }
+
+    function deleteSite(index) {
+      sites.splice(index, 1);
+      saveSites();
+      renderSites();
+    }
+
+    // ── Boot ──
+    start();
+  </script>
+</body>
+</html>

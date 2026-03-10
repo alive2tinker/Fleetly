@@ -1,0 +1,16 @@
+{
+  "name": "fleetly",
+  "version": "1.0.0",
+  "description": "Dev environment dependency checker",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^40.8.0"
+  }
+}
